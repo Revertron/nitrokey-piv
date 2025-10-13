@@ -1,0 +1,22 @@
+[package]
+name = "nitrokey-piv"
+version = "1.0.0"
+edition = "2024"
+authors = ["Revertron"]
+description = "Library to work with PIV applet in Nitrokey 3"
+keywords = ["nitrokey", "piv", "encryption", "signing", "security"]
+
+[dependencies]
+anyhow = "1.0"
+pcsc = "2.9"
+der = { version = "0.7.10", features = ["derive", "pem"] }
+spki = { version = "0.7.3", features = ["pem"] }
+sha2 = "0.10.9"
+x509-cert = { version = "0.2.5", features = ["builder"] }
+x509-parser = "0.18.0"
+hkdf = "0.12.4"
+rand = "0.9.2"
+des = "0.8.1"
+aes = "0.8.4"
+cipher = "0.4.4"
+hex-literal = "1.0.0"
