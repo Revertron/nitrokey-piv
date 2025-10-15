@@ -201,8 +201,16 @@ impl Nitrokey3PIV {
 
     /// Perform ECDH with other party's public key. Returns wrapped key of the shared secret.
     pub fn ecdh(&self, slot: PivSlot, peer_point: &[u8], salt: Option<&[u8]>) -> Result<Vec<u8>> {
+        let my_key = self.read_public_key(slot)?;
+        let my_key = match my_key {
+            None => bail!("No key in slot {:?}", slot),
+            Some(key) => key
+        };
         let shared_point = ecdh(&self.card, slot, peer_point)?;
-        Ok(wrap_key(&shared_point, salt).to_vec())
+        let mut info = Vec::new();
+        info.extend_from_slice(&my_key);
+        info.extend_from_slice(peer_point);
+        Ok(wrap_key(&shared_point, salt, &info).to_vec())
     }
 
     /// Perform ECDH with other party's public key. Returns unwrapped shared secret.

@@ -392,10 +392,10 @@ pub fn read_pubkey_from_certificate(cert_der: &[u8]) -> Result<Vec<u8>> {
 }
 
 /// Wraps shared secret using HKDF and given salt (can be empty)
-pub fn wrap_key(shared_secret: &[u8], salt: Option<&[u8]>) -> [u8; 32] {
+pub fn wrap_key(shared_secret: &[u8], salt: Option<&[u8]>, info: &[u8]) -> [u8; 32] {
     let hk = Hkdf::<Sha256>::new(salt, shared_secret);
     let mut okm = [0u8; 32];
-    hk.expand(b"nise1", &mut okm)
+    hk.expand(info, &mut okm)
         .expect("HKDF expand");
 
     okm
