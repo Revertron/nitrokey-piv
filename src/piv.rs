@@ -195,8 +195,8 @@ impl Nitrokey3PIV {
     /// Generates a key in the given slot, builds **minimal** certificate,
     /// signs it with the **fresh** key, and stores it in given PIV slot.
     /// Returns public key from the fresh key-pair.
-    pub fn generate_key_and_cert(&self, slot: PivSlot, subject: &CertificateSubject, curve: EccCurve, validity_days: u32, pin: &str) -> Result<PublicKey> {
-        generate_key_and_cert(&self.card, slot, subject, curve, validity_days, pin)
+    pub fn generate_key_and_cert(&self, slot: PivSlot, subject: &CertificateSubject, curve: EccCurve, validity_days: u32) -> Result<PublicKey> {
+        generate_key_and_cert(&self.card, slot, subject, curve, validity_days)
     }
 
     /// Perform ECDH with other party's public key. Returns wrapped key of the shared secret.
@@ -545,7 +545,7 @@ pub fn read_public_key(card: &Card, slot: PivSlot) -> Result<Option<Vec<u8>>> {
 /// Generates a key in the given slot, builds **minimal** certificate,
 /// signs it with the **fresh** key, and stores it in given PIV slot.
 /// Returns public key from the fresh key-pair.
-pub fn generate_key_and_cert(card: &Card, slot: PivSlot, subject: &CertificateSubject, curve: EccCurve, validity_days: u32, pin: &str) -> Result<PublicKey> {
+pub fn generate_key_and_cert(card: &Card, slot: PivSlot, subject: &CertificateSubject, curve: EccCurve, validity_days: u32) -> Result<PublicKey> {
     // Generate ECC key-pair on device
     let algo_id = match curve {
         EccCurve::P256 => utils::ALGO_NISTP256,
@@ -579,7 +579,6 @@ pub fn generate_key_and_cert(card: &Card, slot: PivSlot, subject: &CertificateSu
 
     // Build certificate
     let cert_der = build_self_signed_cert(&public_key, subject, validity_days, |tbs_der| {
-        verify_pin(card, pin)?;
         // sign on-device with the **fresh** key
         sign_data(card, slot, public_key.curve, tbs_der)
     })?;
