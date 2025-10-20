@@ -391,6 +391,41 @@ pub fn read_pubkey_from_certificate(cert_der: &[u8]) -> Result<Vec<u8>> {
     }
 }
 
+/// Parses certificate in DER format, and gets public key from it
+pub fn read_subject_from_certificate(cert_der: &[u8]) -> Result<String, String> {
+    let (_, cert) = X509Certificate::from_der(cert_der)
+        .map_err(|e| format!("Failed to parse certificate: {}", e))?;
+
+    // Get the subject
+    let subject = cert.subject();
+
+    // Build a formatted string
+    let mut parts = Vec::new();
+
+    for rdn in subject.iter() {
+        for attr in rdn.iter() {
+            let oid = attr.attr_type();
+            let value = attr.attr_value().as_str()
+                .map_err(|e| format!("Failed to parse attribute value: {}", e))?;
+
+            // Map common OIDs to their abbreviations
+            let name = match oid.to_id_string().as_str() {
+                "2.5.4.3" => "CN",    // Common Name
+                "2.5.4.10" => "O",    // Organization
+                "2.5.4.11" => "OU",   // Organizational Unit
+                "2.5.4.6" => "C",     // Country
+                "2.5.4.7" => "L",     // Locality
+                "2.5.4.8" => "ST",    // State/Province
+                _ => continue,         // Skip unknown attributes
+            };
+
+            parts.push(format!("{}={}", name, value));
+        }
+    }
+
+    Ok(parts.join(", "))
+}
+
 /// Wraps shared secret using HKDF and given salt (can be empty)
 pub fn wrap_key(shared_secret: &[u8], salt: Option<&[u8]>, info: &[u8]) -> [u8; 32] {
     let hk = Hkdf::<Sha256>::new(salt, shared_secret);

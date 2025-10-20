@@ -1,6 +1,6 @@
 [package]
 name = "nitrokey-piv"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2024"
 authors = ["Revertron"]
 description = "Library to work with PIV applet in Nitrokey 3"
